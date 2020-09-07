@@ -1,8 +1,8 @@
 'use strict';
+// jest.mock('minimist');
 
 const Input = require('../lib/input.js');
 let myInputs = new Input();
-
 
 describe('Input Module', ()=> {
     
@@ -13,7 +13,8 @@ describe('Input Module', ()=> {
   it('getAdd() vaild case for action', ()=> {
     expect(myInputs.getAdd('hi' , 'add').action).toEqual('add');
   });
+
   it('getAdd() defaults to ERROR when there is no values', ()=> {
-    expect(myInputs.getAdd('hi' , 'add').payload).toEqual('Adding Note: Error: you can just use -a or --add');
+    expect(myInputs.getAdd('Error: you can just use -a or --add' , 'add').payload).toEqual('Adding Note: Error: you can just use -a or --add');
   });
 });
