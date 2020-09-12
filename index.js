@@ -1,52 +1,28 @@
 'use strict';
 
+require('dotenv').config();
+
+//set up mongoose
 const mongoose = require('mongoose');
-require('dotenv').config('.env');
 
-const URL = process.env.URL;
-
-mongoose.connect(URL, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-}) .then(() => {
-  console.log('connected');
-}).catch((err) => console.log(err));
+  useUnifiedTopology: true
+});
 
-const Input = require('./lib/input.js');
-const Notes = require('./lib/notes.js');
+const db = mongoose.connection;
+db.on('open', () => {
+  console.log('connected to mongo');
+});
 
-const myInputs = new Input();
-const notes = new Notes();
+// node modules
+const Note = require('./lib/notes');
+const Input = require('./lib/input');
 
-notes.add(myInputs);
-
-
-
-
-
-// if (myInputs.valid()) {
-//   notes.execute(myInputs.command)
-//     .then(result => {
-//       if (myInputs.command == 'List') {
-//         const notes = result;
-//         notes.forEach(note => {
-//           console.log(note.text);
-//           console.log('');
-//           console.log(` Category: ${note.category}\t`);
-//           console.log('--------------------------------\n');
-//         });
-//       }
-//     })
-//     .then(mongoose.disconnect)
-//     .catch(error => console.error(error));
-// } 
-// else {
-//   help();
-// }
-
-// function help () {
-//   console.log('Error!');
-//   process.exit();
-// }
+try {
+  const options = new Input();
+  const note = new Note(options);
+  note.execute();
+} catch(error){
+  console.log(error)
+};

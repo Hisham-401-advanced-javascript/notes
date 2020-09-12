@@ -1,20 +1,50 @@
 'use strict';
-// jest.mock('minimist');
+
+jest.mock('minimist');
+const minimist = require('minimist');
 
 const Input = require('../lib/input.js');
-let myInputs = new Input();
 
-describe('Input Module', ()=> {
-    
-  it('getAdd() vaild case for payload', ()=> {
-    expect(myInputs.getAdd('hi' , 'add').payload).toEqual('Adding Note: hi');
+describe('Testing the Input module with valid input', () => {
+  
+  it('valid input should return true', () => {
+    minimist.mockImplementation(() => {
+      return {
+        _: [],
+        add: 'this is my note',
+        category: 'school'
+      }
+    });
+    let options = new Input();
+    expect(options.valid()).toEqual(true);
   });
-
-  it('getAdd() vaild case for action', ()=> {
-    expect(myInputs.getAdd('hi' , 'add').action).toEqual('add');
-  });
-
-  it('getAdd() defaults to ERROR when there is no values', ()=> {
-    expect(myInputs.getAdd('Error: you can just use -a or --add' , 'add').payload).toEqual('Adding Note: Error: you can just use -a or --add');
-  });
+  it('object is created with action and payload', () => {
+    minimist.mockImplementation(() => {
+      return {
+        _: [],
+        add: 'this is my note',
+        category: 'groceries'
+      }
+    });
+    let options = new Input();
+    let expectedOptions = { action: 'add', payload: 'this is my note', category: 'groceries'};
+    expect(options).toEqual(expectedOptions);
+  })
 });
+
+
+
+describe('Testing the Input module with invalid input', () => {
+  
+  it('valid input should return false which throws an error', () => {
+    minimist.mockImplementation(() => {
+      return {
+        _: [],
+        purple: 'this is my note',
+        category: 'school'
+      }
+    });
+    let options = new Input();
+    expect(options.valid()).toEqual(false);
+  })
+  });
