@@ -2,49 +2,37 @@
 
 jest.mock('minimist');
 const minimist = require('minimist');
+minimist.mockImplementation(() => {
+  return {
+    a: 'note'
+  };
+});
 
 const Input = require('../lib/input.js');
 
-describe('Testing the Input module with valid input', () => {
-  
-  it('valid input should return true', () => {
-    minimist.mockImplementation(() => {
-      return {
-        _: [],
-        add: 'this is my note',
-        category: 'school'
-      }
-    });
+describe('Input Module', () => {
+  it('input class will work properly', () => {
     let options = new Input();
-    expect(options.valid()).toEqual(true);
+    expect(options.action).toEqual('a');
+    expect(options.payload).toEqual('note');
   });
-  it('object is created with action and payload', () => {
-    minimist.mockImplementation(() => {
-      return {
-        _: [],
-        add: 'this is my note',
-        category: 'groceries'
-      }
-    });
+
+  it('getAction() will have valid action when specified', () => {
     let options = new Input();
-    let expectedOptions = { action: 'add', payload: 'this is my note', category: 'groceries'};
-    expect(options).toEqual(expectedOptions);
-  })
+    expect(options.getAction({ a: 'note' })).toEqual('a');
+    expect(options.getAction()).toEqual(undefined);
+    expect(options.getAction({ add: 'note' })).toEqual('add');
+  });
+
+  it('getPayload() will have valid payload when specified', () => {
+    let options = new Input();
+    expect(options.getPayload('note')).toEqual('note');
+    expect(options.getPayload(true)).toEqual(undefined);
+    expect(options.getPayload(2)).toEqual(undefined);
+  });
+
+  it('isValid() respects proper object', () => {
+    let options = new Input();
+    expect(options.isValid()).toEqual(undefined);
+  });
 });
-
-
-
-describe('Testing the Input module with invalid input', () => {
-  
-  it('valid input should return false which throws an error', () => {
-    minimist.mockImplementation(() => {
-      return {
-        _: [],
-        purple: 'this is my note',
-        category: 'school'
-      }
-    });
-    let options = new Input();
-    expect(options.valid()).toEqual(false);
-  })
-  });

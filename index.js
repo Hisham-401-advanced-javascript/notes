@@ -1,28 +1,33 @@
 'use strict';
-
-require('dotenv').config();
-
-//set up mongoose
 const mongoose = require('mongoose');
+require('dotenv').config('.env');
+const Input = require('./lib/input.js');
+const Notes = require('./lib/notes.js');
 
-mongoose.connect(process.env.MONGODB_URI, {
+// this should be in your .env file
+const MONGOOSE_URL = process.env.MONGOOSE_URL;
+
+mongoose.connect(MONGOOSE_URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
 });
 
-const db = mongoose.connection;
-db.on('open', () => {
-  console.log('connected to mongo');
-});
 
-// node modules
-const Note = require('./lib/notes');
-const Input = require('./lib/input');
+//new input from user that returns note object
+const userInput = new Input();
 
-try {
-  const options = new Input();
-  const note = new Note(options);
-  note.execute();
-} catch(error){
-  console.log(error)
-};
+//new Notes object
+const notes = new Notes();
+
+//check if  it is valid before start execute
+userInput.isValid() ? notes.execute(userInput) : showError();
+
+function showError() {
+  console.log(`
+    api usage: --add <note> --category <category>
+    --add or -a adding new note
+    --category or -c adding category
+`);
+}

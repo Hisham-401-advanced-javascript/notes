@@ -1,28 +1,66 @@
 'use strict';
 
-const Note = require('../lib/notes.js');
+require('@code-fellows/supergoose');
+const Notes = require('../lib/notes.js');
 
+// Spies!
+// we will get to know if something was called or not.
 jest.spyOn(global.console, 'log');
 
-// These tests fail now that we're using mongoose. When I add the config that mongoose says is needed (I got a warning from mongoose when I run the tests that it won't work with jest and the way to fix it was to add the config file), then I get a message that tests can't be run after the jest environment is torn down. 
-describe('testing note modules', () => {
-
-  it('should log when no action', () => {
-    let note = new Note({ action: null, payload: 'my note', category: 'school' });
-    note.execute();
-    expect(console.log).toHaveBeenCalledWith('That action is invalid. Try again.');
+// describe the module I am testing
+describe('Notes Module', () => {
+  // test add
+  it('add() should save the note to database', () => {
+    let data = { payload: 'note', category: 'test' };
+    const notes = new Notes();
+    return notes.add(data).then((res) => {
+      for (const key in data) {
+        expect(res[key]).toEqual(data[key]);
+      }
+    });
   });
 
-  it('should log when no payload', () => {
-    let note = new Note({ action: 'add', payload: null, category: 'groceries'});
-    note.execute();
-    expect(console.log).toHaveBeenCalledWith('You must add the note text and a category.');
-  })
+  // test delete
+  it('delete() should delete the note from database', () => {
+    let data = { payload: 'note', category: 'test' };
+    const notes = new Notes();
+    return notes.add(data).then((res) => {
+      return notes.delete({ payload: res._id }).then((result) => {
+        for (const key in data) {
+          expect(result[key]).toEqual(data[key]);
+        }
+      });
+    });
+  });
 
-  it('should log when added note', () => {
-    let note = new Note( { action: 'add', payload: 'my note'});
-    note.execute();
-    expect(console.log).toHaveBeenCalledWith('Adding note: my note');
+  //test list
+  it('list() should get me the list of notes in database', () => {
+    let data = { payload: 'note', category: 'test' };
+    const notes = new Notes();
+    return notes.add(data).then((res) => {
+      return notes.list({ payload: 'test' }).then((result) => {
+        for (const key in data) {
+          expect(result[0][key]).toEqual(data[key]);
+        }
+      });
+    });
+  });
 
-  })
+  // console log in execute
+  it('execute() logs out when given options', () => {
+    const notes = new Notes();
+    notes.execute({ action: undefined });
+    expect(console.log).toHaveBeenCalled();
+  });
+
+  // Check for console log
+  it('add() logs out when given options', () => {
+    let data = { payload: 'note', category: 'test' };
+    const notes = new Notes();
+    return notes.add(data).then((res) => {
+      expect(console.log).toHaveBeenCalled();
+    });
+  });
+
+
 });
