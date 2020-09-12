@@ -1,52 +1,33 @@
 'use strict';
-
 const mongoose = require('mongoose');
 require('dotenv').config('.env');
+const Input = require('./lib/input.js');
+const Notes = require('./lib/notes.js');
 
-const URL = process.env.URL;
+// this should be in your .env file
+const MONGOOSE_URL = process.env.MONGOOSE_URL;
 
-mongoose.connect(URL, {
+mongoose.connect(MONGOOSE_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
   useFindAndModify: false,
-}) .then(() => {
-  console.log('connected');
-}).catch((err) => console.log(err));
+});
 
-const Input = require('./lib/input.js');
-const Notes = require('./lib/notes.js');
 
-const myInputs = new Input();
+//new input from user that returns note object
+const userInput = new Input();
+
+//new Notes object
 const notes = new Notes();
 
-notes.add(myInputs);
+//check if  it is valid before start execute
+userInput.isValid() ? notes.execute(userInput) : showError();
 
-
-
-
-
-// if (myInputs.valid()) {
-//   notes.execute(myInputs.command)
-//     .then(result => {
-//       if (myInputs.command == 'List') {
-//         const notes = result;
-//         notes.forEach(note => {
-//           console.log(note.text);
-//           console.log('');
-//           console.log(` Category: ${note.category}\t`);
-//           console.log('--------------------------------\n');
-//         });
-//       }
-//     })
-//     .then(mongoose.disconnect)
-//     .catch(error => console.error(error));
-// } 
-// else {
-//   help();
-// }
-
-// function help () {
-//   console.log('Error!');
-//   process.exit();
-// }
+function showError() {
+  console.log(`
+    api usage: --add <note> --category <category>
+    --add or -a adding new note
+    --category or -c adding category
+`);
+}
